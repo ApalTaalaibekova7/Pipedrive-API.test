@@ -1,30 +1,40 @@
-// Добавляю "слушатель" события на кнопку с ID submitForm. Когда кнопка нажимается, вызывается функция, которая выполняет отправку данных.
 document.getElementById('submitForm').addEventListener('click', function() {
-    const clientName = document.getElementById('clientName').value; //Извлекается значение поля ввода с ID clientName. Это имя клиента, которое пользователь ввел в форму.
-    const dealValue = document.getElementById('dealValue').value; //Извлекается значение поля ввода с ID dealValue. Это сумма сделки, введенная пользователем.
-    const dealStatus = document.getElementById('dealStatus').value; // Извлекается значение поля ввода с ID dealStatus. Это статус сделки.
+    const clientName = document.getElementById('clientName').value; 
+    const dealValue = document.getElementById('dealValue').value;
+    const dealStatus = document.getElementById('dealStatus').value;
+
+  // Проверка обязательных полей
+  if (!clientName || !dealValue || !dealStatus ) {
+    alert('Все поля формы должны быть заполнены!');
+    return;
+}  
 
     const dealData = {
         title: clientName,
         value: dealValue,
-        status: dealStatus
-    };//Создается объект dealData, который содержит информацию о сделке. Ключи объекта (title, value, status) соответствуют данным, которые  отправляю в Pipedrive API.
-
-
-    
-    //Отправляю запрос на API Pipedrive для создания сделки. В URL запроса передается мой API токен (чтобы авторизоваться в системе).
-    fetch('https://api.pipedrive.com/v1/deals?api_token=2865c8fd622798bae5647b4e9ef7f58484f78b32', {
-        method: 'POST', //Указываю метод HTTP-запроса как POST, так как  отправляю новые данные (создаю новую сделку).
+        status: dealStatus,
+    };
+  // API-запрос 
+  fetch('https://api.pipedrive.com/v1/deals?api_token=4cd7e1e9b1e1390a8dc19708132ea2ea9df0009d',  {
+        method: 'POST', 
         headers: {
             'Content-Type': 'application/json',
-        }, //Заголовки запроса. Указываю, что отправляю данные в формате JSON.
-        body: JSON.stringify(dealData), // Тело запроса. передаю данные сделки в формате JSON, используя JSON.stringify(), чтобы преобразовать объект dealData в строку JSON.
+        },
+        body: JSON.stringify(dealData), 
     })
-    .then(res => res.json()) //Когда сервер Pipedrive отвечает,  преобразую ответ в JSON с помощью res.json().
+    .then(res => res.json())
     .then(data => {
-        console.log('Сделка успешно создана:', data);
-    }) // В этом блоке обрабатывается успешный ответ от сервера. В консоль выводится сообщение о том, что сделка успешно создана, и сам ответ от Pipedrive.
+        if (data.success) {
+            alert('Сделка успешно создана!');
+            console.log('Сделка успешно создана:', data);
+        } else {
+            alert(`Ошибка: ${data.error || 'Не удалось создать сделку'}`);
+            console.error('Ошибка при создании сделки:', data);
+        }
+    })
     .catch(error => {
-        console.error('Ошибка при создании сделки:', error); //Если произошла ошибка при запросе (например, неверный API токен или сервер недоступен), она будет поймана и выведена в консоль.
+        alert('Произошла ошибка при отправке данных на сервер.');
+        console.error('Ошибка при создании сделки:', error);
     });
+    
 });
